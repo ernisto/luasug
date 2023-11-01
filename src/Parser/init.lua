@@ -3,11 +3,6 @@ type TokenStream = Lexer.TokenStream
 
 local Parser = {}
 
-
-function Parser.parse(tokenStream: TokenStream)
-
-
-
-end
+function Parser.parse(tokenStream: TokenStream) end
 
 return Parser
