@@ -1,12 +1,14 @@
 --// Packages
-local Parser = require("./Parser/init.lua")
-local Lexer = require("./Lexer/init.lua")
+local Parser = require("Parser/init.lua")
+local Lexer = require("Lexer/init.lua")
 
-local a = 2
 --// Run
-local tokenStream = Lexer.tokenize([[
+local lexer = Lexer.new([[
 local a = 10
 ]])
-local ast = Parser.parse(tokenStream)
+
+local tokenStream = lexer:tokenize()
+local parser = tokenStream:parse()
+local ast = parser:block()
 
 print(ast)
