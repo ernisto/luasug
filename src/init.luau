@@ -9,6 +9,6 @@ local a = 10
 
 local tokenStream = lexer:tokenize()
 local parser = tokenStream:parse()
-local ast = parser:block()
+local ast = parser:body()
 
 print(ast)

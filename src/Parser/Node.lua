@@ -9,18 +9,25 @@ local Node = {}
 Node.__index = Node
 
 --// Factory
-function Parser:node(kind: string, start: pos)
+function Parser:node(kind: string, start: pos, isValid: boolean)
     
     local node = setmetatable({
         final = self:getPos(),
+        isValid = isValid,
         start = start,
         kind = kind,
+        root = nil,
     }, Node)
     
     --// End
     return node
 end
-export type Node = { kind: string, start: pos, final: pos }
+
+--// Methods
+function Node:receive(visitor)
+    
+    visitor:visitNode(self)
+end
 
 --// End
 return Node
