@@ -33,7 +33,12 @@ function Lexer.new(source: string)
 	end
 	function self:popAlpha(): string
 		
-		return chars[index]:lower() ~= chars[index]:upper()
+		local char = self:peek()
+		if not char then return end
+		if char:lower() == char:upper() then return end
+		
+		self:advance()
+		return char
 	end
 	function self:popDigit(): string
 		
