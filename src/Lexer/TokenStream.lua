@@ -1,87 +1,75 @@
 --// Packages
 local Lexer = require("init.lua")
-type Lexer = Lexer.Lexer
 
 --// Module
 local TokenStream = {}
 TokenStream.__index = TokenStream
 
 --// Factory
-function Lexer:tokenize(): TokenStream
+function Lexer:tokenize()
     
+    local diagnostics = {}
     local tokens = {}
     local index = 0
-
-    --// Tokenize
+    
     repeat
-        --// Digit
-        if self:checkDigit() or (self:checkChar(".") and self:checkDigit()) then
-            table.insert(tokens, self:scanDigit())
-
-            continue
-        end
-
-        --// Identifier
-        if self:checkAlpha() then
-            table.insert(tokens, self:scanIdentifier())
-
-            continue
-        end
-
-        --// String
-        if self:checkChar("\"") or self:checkChar("'") then
-            table.insert(tokens, self:scanString())
-
-            continue
-        end
-
-        --// Operator
-        if self:checkOperator() then
-            table.insert(tokens, self:scanOperator())
-
-            continue
-        end
-
-        --// Flag Comment
-        if self:checkSequence("--[[") then
-            self:next(4)
-
-            while not self:checkSequence("]]") do
-                self:next()
-            end
-
-            self:next(2)
-
-            continue
-        end
-
-        --// Skip
-        if self:checkSkip() then
-            self:next()
-
-            continue
-        end
-
-        --// Char
-        table.insert(tokens, self:scanChar())
-
-    until not self:next()
+        local tok = self:scanToken()
+        table.insert(tokens, tok)
+    until not tok
     
     --// Instance
-    local self = setmetatable({}, TokenStream)
+    local self = setmetatable({ diagnostics = diagnostics, tokens = tokens }, TokenStream)
     
     --// Methods
-    function self:getPos(): pos
-    end
-    function self:read(): Token
+    function self:report(message: string)
         
-        return tokens[index]
+        local diagnostic = { message = message, begin = self:getPos(), final = self:peek() and self:peek().final }
+        table.insert(diagnostics, diagnostic)
     end
-    function self:next()
+    
+    function self:backpoint()
+        
+        local backIndex = index
+        return function()
+            
+            index = backIndex
+            return self
+        end
+    end
+    function self:advance()
         
         index += 1
     end
     
+    function self:peek(kind: string?)
+        
+        local tok = tokens[index]
+        if not tok then return end
+        if kind and tok.kind ~= kind then return end
+        
+        return tok
+    end
+    function self:peekSome(...: string)
+        
+        local tok = self:peek()
+        for _,kind in {...} do
+            
+            if tok.kind == kind then return tok end
+        end
+    end
+    
+    function self:pop(kind: string?)
+        
+        local tok = self:peek(kind)
+        if tok then self:advance() return tok end
+    end
+    function self:popSome(...: string)
+        
+        local tok = self:peekSome(...)
+        if tok then self:advance() return tok end
+    end
+    
+    --// Edit
     function self:setPos(pos: pos)
     end
     function self:insert(init: pos, text: string)
@@ -92,6 +80,7 @@ function Lexer:tokenize(): TokenStream
     --// End
     return self
 end
+print("Lexer.tokenize =", Lexer.tokenize)
 
 --// End
 return TokenStream

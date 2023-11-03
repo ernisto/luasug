@@ -11,6 +11,54 @@ Parser.__index = Parser
 function TokenStream:parse()
     
     setmetatable(self, Parser)
+    local lastComment
+    
+    --// Methods
+    function self:popChar(char: string?)
+        
+        local tok = self:pop("char")
+        if not tok then return end
+        if char and tok.char ~= char then return end
+        
+        return tok
+    end
+    function self:popWord(word: string?)
+        
+        local tok = self:pop("word")
+        if not tok then return end
+        if word and tok.word ~= word then return end
+        
+        return word
+    end
+    
+    function self:popNumber()
+        
+        return self:popSome("dec_num", "hex_num", "bin_num")
+    end
+    function self:popString()
+        
+        return self:popSome("simple_str", "block_str")
+    end
+    
+    function self:getLastComment()
+        
+        return lastComment
+    end
+    
+    --// Override
+    local advanceTokenStream = self.advance
+    function self:advance()
+        
+        repeat
+            advanceTokenStream(self)
+            
+            local comment = self:pop("comment")
+            if comment then lastComment = comment end
+            
+        until not comment
+    end
+    
+    --// End
     return self
 end
 
