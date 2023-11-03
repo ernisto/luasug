@@ -52,6 +52,10 @@ function Lexer.new(source: string)
 		
 		index += length
 	end
+	function self:pos()
+		
+		return index
+	end
 	
 	function self:skipBlank(): boolean
 		
