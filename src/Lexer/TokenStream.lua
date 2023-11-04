@@ -1,5 +1,8 @@
 --// Packages
+local types = require("../types.lua")
+
 local Lexer = require("init.lua")
+    require("Token.lua")
 
 --// Module
 local TokenStream = {}
@@ -80,7 +83,6 @@ function Lexer:tokenize()
     --// End
     return self
 end
-print("Lexer.tokenize =", Lexer.tokenize)
 
 --// End
 return TokenStream

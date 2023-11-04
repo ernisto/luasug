@@ -62,37 +62,13 @@ function Lexer:popBlock(): string?
     if not self:popChar("[") then rollback(); return end
     return self:popUntil(`]{ident}]`)
 end
-function Lexer:popUntil(ender: string): string?
-    
-    local nextEndChar = ender:sub(1, 1)
-    local endMatchGoal = #ender
-    local endMatchCount = 0
-    
-    local content = ""
-    
-    while true do
-        
-        local char = self:popChar()
-        if not char then return content end
-        
-        if char == nextEndChar then
-            
-            endMatchCount += 1
-            if endMatchCount == endMatchGoal then return content end
-        else
-            
-            endMatchCount = 0
-            content ..= char
-        end
-    end
-end
 
 --// Tokens
 function Lexer:scanToken()
     
     return self:scanWord()
         or self:scanBinNumber() or self:scanHexNumber() or self:scanDecNumber()
-        or self:scanSingleString() or self:scanBlockString()
+        or self:scanSimpleString() or self:scanBlockString()
         or self:scanComment()
         or self:scanOperator()
         or self:scanChar()
@@ -189,15 +165,14 @@ function Lexer:scanDecNumber()
             fractional ..= digit
             digit = self:popDigit()
         end
-    else
-        
-        return
     end
+    if #integral == 0 then return end
     
     if self:popChar("e") then
         
         digit = self:popDigit()
         while digit do
+            
             exponent ..= digit
             digit = self:popDigit()
         end

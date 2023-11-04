@@ -1,6 +1,6 @@
 --// Packages
 local types = require("../types.lua")
-type range = types.range
+local pos = types.pos
 type pos = types.pos
 
 --// Module
@@ -11,8 +11,11 @@ Lexer.__index = Lexer
 function Lexer.new(source: string)
 	
 	local self = setmetatable({}, Lexer)
-	local chars = source:split()
-	local index = 0
+	local chars = source:split("")
+	
+	local lineStart = 1
+	local lines = 1
+	local index = 1
 	
 	function self:popChar(expectedChar: string?): string
 		
@@ -33,7 +36,12 @@ function Lexer.new(source: string)
 	end
 	function self:popAlpha(): string
 		
-		return chars[index]:lower() ~= chars[index]:upper()
+		local char = self:peek()
+		if not char then return end
+		if char:lower() == char:upper() then return end
+		
+		index += 1
+		return char
 	end
 	function self:popDigit(): string
 		
@@ -46,22 +54,12 @@ function Lexer.new(source: string)
 	
 	function self:peek(length: number): string
 		
-		return table.concat(chars, index, index + length - 1)
+		return if length then table.concat(chars, index, index + length - 1)
+			else chars[index]
 	end
 	function self:advance(length: number)
 		
 		index += length
-	end
-	
-	function self:skipBlank(): boolean
-		
-		local char = chars[index]
-		
-		while char == " " or char == "\n" or char == "\t" do
-			
-			index += 1
-			char = chars[index]
-		end
 	end
 	function self:backpoint(): () -> ()
 		
@@ -70,6 +68,57 @@ function Lexer.new(source: string)
 			
 			index = backIndex
 			return self
+		end
+	end
+	function self:pos(): pos
+		
+		return setmetatable({ absolute = index, column = index - lineStart + 1, line = lines }, pos)
+	end
+	
+	function self:skipBlank(): boolean
+		
+		local char = chars[index]
+		
+		while char == " " or char == "\n" or char == "\t" do
+			
+			if char == "\n" then
+				
+				lineStart = index
+				lines += 1
+			end
+			
+			index += 1
+			char = chars[index]
+		end
+	end
+	function self:popUntil(ender: string): string?
+		
+		local nextEndChar = ender:sub(1, 1)
+		local endMatchGoal = #ender
+		local endMatchCount = 0
+		
+		local content = ""
+		
+		while true do
+			
+			local char = self:popChar()
+			if not char then return content end
+			
+			if char == "\n" then
+				
+				lineStart = index
+				lines += 1
+			end
+			
+			if char == nextEndChar then
+				
+				endMatchCount += 1
+				if endMatchCount == endMatchGoal then return content end
+			else
+				
+				endMatchCount = 0
+				content ..= char
+			end
 		end
 	end
 	
