@@ -1,7 +1,6 @@
 --// Packages
 local Parser = require("init.lua")
 local Node = require("Node.lua")
-type Node = Node.Node
 
 --// Nodes
 function Parser:expr()
