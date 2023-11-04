@@ -68,7 +68,7 @@ function Lexer:scanToken()
     
     return self:scanWord()
         or self:scanBinNumber() or self:scanHexNumber() or self:scanDecNumber()
-        or self:scanSingleString() or self:scanBlockString()
+        or self:scanSimpleString() or self:scanBlockString()
         or self:scanComment()
         or self:scanOperator()
         or self:scanChar()
@@ -165,15 +165,14 @@ function Lexer:scanDecNumber()
             fractional ..= digit
             digit = self:popDigit()
         end
-    else
-        
-        return
     end
+    if #integral == 0 then return end
     
     if self:popChar("e") then
         
         digit = self:popDigit()
         while digit do
+            
             exponent ..= digit
             digit = self:popDigit()
         end
