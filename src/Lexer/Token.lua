@@ -62,30 +62,6 @@ function Lexer:popBlock(): string?
     if not self:popChar("[") then rollback(); return end
     return self:popUntil(`]{ident}]`)
 end
-function Lexer:popUntil(ender: string): string?
-    
-    local nextEndChar = ender:sub(1, 1)
-    local endMatchGoal = #ender
-    local endMatchCount = 0
-    
-    local content = ""
-    
-    while true do
-        
-        local char = self:popChar()
-        if not char then return content end
-        
-        if char == nextEndChar then
-            
-            endMatchCount += 1
-            if endMatchCount == endMatchGoal then return content end
-        else
-            
-            endMatchCount = 0
-            content ..= char
-        end
-    end
-end
 
 --// Tokens
 function Lexer:scanToken()
