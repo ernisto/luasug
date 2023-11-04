@@ -37,7 +37,7 @@ function Lexer.new(source: string)
 		if not char then return end
 		if char:lower() == char:upper() then return end
 		
-		self:advance()
+		index += 1
 		return char
 	end
 	function self:popDigit(): string
