@@ -72,7 +72,7 @@ function Lexer.new(source: string)
 	end
 	function self:pos(): pos
 		
-		return setmetatable({ absolute = index, column = index - lineStart, line = lines }, pos)
+		return setmetatable({ absolute = index, column = index - lineStart + 1, line = lines }, pos)
 	end
 	
 	function self:skipBlank(): boolean
