@@ -150,6 +150,9 @@ function Lexer:scanDecNumber()
     local integral = ""
     local exponent = ""
     
+    local sign = if self:popChar("-") then -1 elseif self:popChar("+") then 1 else 1
+    local exponentSign
+    
     local digit = self:popDigit()
     while digit do
         
@@ -170,6 +173,8 @@ function Lexer:scanDecNumber()
     
     if self:popChar("e") then
         
+        exponentSign = if self:popChar("-") then -1 elseif self:popChar("+") then 1 else 1
+        
         digit = self:popDigit()
         while digit do
             
@@ -185,6 +190,8 @@ function Lexer:scanDecNumber()
     token.fractional = tonumber(fractional)
     token.exponent = tonumber(exponent)
     token.integral = tonumber(integral)
+    token.exponentSign = exponentSign
+    token.sign = sign
     token.type = type
     token.radix = 10
     
