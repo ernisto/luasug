@@ -20,6 +20,7 @@ function TokenStream:parse()
         if not tok then return end
         if char and tok.char ~= char then return end
         
+        self:advance()
         return tok
     end
     function self:popWord(word: string?)
@@ -28,6 +29,7 @@ function TokenStream:parse()
         if not tok then return end
         if word and tok.word ~= word then return end
         
+        self:advance()
         return word
     end
     
