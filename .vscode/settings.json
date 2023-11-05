@@ -8,5 +8,8 @@
   "editor.formatOnSave": true,
   "[lua][luau]": {
     "editor.defaultFormatter": "JohnnyMorganz.stylua"
-  }
+  },
+  "robloxLsp.diagnostics.disable": [
+    "undefined-type"
+  ]
 }
