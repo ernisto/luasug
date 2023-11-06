@@ -79,7 +79,7 @@ function Lexer.new(source: string)
 		return setmetatable({ absolute = index, column = index - lineStart + 1, line = lines }, pos)
 	end
 	
-	function self:skipBlank(): boolean
+	function self:skipBlank()
 		
 		local char = chars[index]
 		
