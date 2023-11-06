@@ -157,28 +157,40 @@ function Lexer:scanDecNumber()
     while digit do
         
         integral ..= digit
+        
+        while self:popChar("_") do end
         digit = self:popDigit()
     end
     
+    while self:popChar("_") do end
     if self:popChar(".") then
         
+        while self:popChar("_") do end
         digit = self:popDigit()
+        
         while digit do
             
             fractional ..= digit
+            
+            while self:popChar("_") do end
             digit = self:popDigit()
         end
     end
     if #integral == 0 then return end
     
+    while self:popChar("_") do end
     if self:popChar("e") then
         
         exponentSign = if self:popChar("-") then -1 elseif self:popChar("+") then 1 else 1
         
+        while self:popChar("_") do end
         digit = self:popDigit()
+        
         while digit do
             
             exponent ..= digit
+            
+            while self:popChar("_") do end
             digit = self:popDigit()
         end
     end
