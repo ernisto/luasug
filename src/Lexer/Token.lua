@@ -39,14 +39,14 @@ function Lexer:popEscape(): string?
 end
 function Lexer:popWord(): string?
     
-    local alpha = self:popAlpha()
+    local alpha = self:popAlpha() or self:popChar("_")
     if not alpha then return end
     
     local word = ""
     while alpha do
         
         word ..= alpha
-        alpha = self:popAlpha()
+        alpha = self:popAlpha() or self:popDigit() or self:popChar("_")
     end
     
     return word
