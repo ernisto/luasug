@@ -119,6 +119,8 @@ function Lexer:scanOperator()
         and str
         
         if not op then return end
+        
+        isAssignment = op == "="
         self:advance(#op)
     end
     
