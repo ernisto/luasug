@@ -43,10 +43,10 @@ function Lexer.new(source: string)
 		index += 1
 		return char
 	end
-	function self:popDigit(): string
+	function self:popDigit(radix: number?): string
 		
 		local char = chars[index]
-		if not tonumber(char) then return end
+		if not tonumber(char, radix) then return end
 		
 		index += 1
 		return char
