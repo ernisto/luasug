@@ -198,7 +198,26 @@ function Lexer:scanDecNumber()
     
     return token
 end
-function Lexer:scanBinNumber()  --TODO
+function Lexer:scanBinNumber()
+    
+    local start = self:pos()
+    if not self:popSeq("0b") then return end
+    
+    local integral = ""
+    
+    local digit = self:popDigit(2)
+    while digit do
+        
+        integral ..= digit
+        
+        while self:popChar("_") do end
+        digit = self:popDigit(2)
+    end
+    
+    local token = self:newToken("bin_num", start)
+    token.integral = tonumber(integral, 2)
+    
+    return token
 end
 function Lexer:scanHexNumber()
     
