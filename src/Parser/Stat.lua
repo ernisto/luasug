@@ -11,7 +11,7 @@ end
 
 function Parser:def()
     
-    local start = self:getPos()
+    local start = self:pos()
     local comment = self:getLastComment()
     local decorators = {}
     
@@ -114,7 +114,7 @@ end
 
 function Parser:if_stat()
     
-    local start = self:getPos()
+    local start = self:pos()
     if not self:popWord("if") then return end
     
     local clauses = {}
