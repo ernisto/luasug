@@ -51,6 +51,10 @@ function Lexer.new(source: string)
 		index += 1
 		return char
 	end
+	function self:popAlphanum(): string
+		
+		return self:popDigit(10 + 26)
+	end
 	
 	function self:peek(length: number): string
 		

@@ -46,7 +46,7 @@ function Lexer:popWord(): string?
     while alpha do
         
         word ..= alpha
-        alpha = self:popAlpha() or self:popDigit() or self:popChar("_")
+        alpha = self:popAlphanum() or self:popChar("_")
     end
     
     return word
