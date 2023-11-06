@@ -211,7 +211,26 @@ function Lexer:scanDecNumber()
 end
 function Lexer:scanBinNumber()  --TODO
 end
-function Lexer:scanHexNumber()  --TODO
+function Lexer:scanHexNumber()
+    
+    local start = self:pos()
+    if not self:popSeq("0x") then return end
+    
+    local integral = ""
+    
+    local digit = self:popDigit(16)
+    while digit do
+        
+        integral ..= digit
+        
+        while self:popChar("_") do end
+        digit = self:popDigit(16)
+    end
+    
+    local token = self:newToken("hex_num", start)
+    token.integral = tonumber(integral, 16)
+    
+    return token
 end
 
 function Lexer:scanSimpleString()
