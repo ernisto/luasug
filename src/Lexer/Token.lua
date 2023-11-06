@@ -22,21 +22,6 @@ function Lexer:newToken(kind: string, start: pos)
 end
 
 --// Utils
-function Lexer:popEscape(): string?
-    
-    if not self:popChar("\\") then return end
-    local escape = self:popChar()
-    
-    return if escape == "\\" then "\\"
-        elseif escape == "t" then "\t"
-        elseif escape == "n" then "\n"
-        elseif escape == "a" then "\a"
-        elseif escape == "b" then "\b"
-        elseif escape == "f" then "\f"
-        elseif escape == "r" then "\r"
-        elseif escape == "v" then "\v"
-        else escape
-end
 function Lexer:popWord(): string?
     
     local alpha = self:popAlpha() or self:popChar("_")
@@ -245,7 +230,7 @@ function Lexer:scanSimpleString()
     local content = ""
     
     repeat
-        local char = self:popEscape() or self:popChar()
+        local char = self:popChar()
         if not char then break end
         
         content ..= char
