@@ -122,7 +122,9 @@ function Lexer:scanOperator()
     if op then
         
         self:advance(#op)
-        isAssignment = self:popChar("=") ~= nil
+        
+        if op == ".." and self:popChar(".") then op = "..."
+        elseif self:popChar("=") then isAssignment = true end
     else
         
         op = self:popChar("=") or self:popChar(">") or self:popChar("<")
