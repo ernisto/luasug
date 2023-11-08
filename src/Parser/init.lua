@@ -164,5 +164,8 @@ function Parser:type_field()
     return if field and field.default then field else rollback():type_expr()
 end
 
+function Parser:type_expr() -- TODO
+end
+
 --// End
 return Parser
