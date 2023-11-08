@@ -22,6 +22,11 @@ function Parser:body()
     return node
 end
 
+function Parser:stat()
+    
+    return self:def()
+        or self:if_stat()
+end
 function Parser:def()
     
     local start = self:pos()
