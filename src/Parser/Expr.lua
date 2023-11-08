@@ -3,23 +3,6 @@ local Parser = require("init.lua")
 local Node = require("Node.lua")
 
 --// Nodes
-function Parser:expr(maxLevel: number?)
-    
-    maxLevel = maxLevel or 99
-    
-    local base = if maxLevel >= 3 then self:prefix() or self:atom() else self:atom()
-    if not base then return end
-    
-    if maxLevel < 4 then return base end
-    
-    repeat
-        local op = self:biop(maxLevel)
-        
-    until false
-
-    return base
-end
-
 function Parser:expr_tuple_def()
     
     local start = self:pos()
@@ -118,10 +101,26 @@ function Parser:expr_tuple()
 end
 function Parser:expr_field()
     
-    local rollback = self:rollback()
+    local rollback = self:backpoint()
     local param = self:expr_field_def()
     
     return if param and param.default then param else rollback():expr()
+end
+
+function Parser:expr(maxLevel: number?)
+    
+    maxLevel = maxLevel or 10
+    
+    local base = self:prefix(maxLevel) or self:atom()
+    if not base then return end
+    
+    repeat
+        local op = self:suffix(base, maxLevel) or self:mid(base, maxLevel)
+        if op then base = op end
+        
+    until not op
+    
+    return base
 end
 
 function Parser:atom()
@@ -140,6 +139,17 @@ function Parser:null()
     
     --// Node
     local node = self:node("null", start, true)
+    return node
+end
+function Parser:boolean()
+    
+    local word = self:popWord("true") or self:popWord("false")
+    if not word then return end
+    
+    --// Node
+    local node = self:node("boolean", word.start, true)
+    node.value = word == "true"
+    
     return node
 end
 function Parser:number()
@@ -168,14 +178,69 @@ function Parser:string()
     
     return node
 end
-function Parser:boolean()
+function Parser:table() -- TODO
+end
+function Parser:array()
     
-    local word = self:popWord("true") or self:popWord("false")
-    if not word then return end
+    local start = self:pos()
+    if not self:popChar("[") then return end
+    
+    local value = self:expr()
+    local values = {value}
+    local isValid = true
+    
+    while isValid and self:popChar(",") do
+        
+        value = self:expr() or self:report("expr expected")
+        table.insert(values, value)
+        
+        isValid = value and isValid
+    end
+    
+    local _tok = self:popChar("]") or self:report("']' expected")
+    isValid = _tok and isValid
     
     --// Node
-    local node = self:node("boolean", word.start, true)
-    node.value = word == "true"
+    local node = self:node("array", start, isValid)
+    node.values = values
+    
+    return node
+end
+function Parser:func()
+    
+    local start = self:pos()
+    if not self:popWord("function") then return end
+    
+    local params = self:expr_tuple_def()
+    local resultType
+    
+    if self:popOperator("->") then
+        
+        resultType = self:type_expr()
+    end
+    local body = self:body()
+    
+    --// Node
+    local node = self:node("func", start, params and true)
+    node.resultType = resultType
+    node.params = params
+    node.body = body
+    
+    return node
+end
+function Parser:arrow_func()
+    
+    local start = self:pos()
+    local params = self:expr_tuple_def()
+    if not params then return end
+    
+    if not self:popOperator("=>") then return end
+    local result = self:expr()
+    
+    --// Node
+    local node = self:node("arrow_func", start, params and true)
+    node.result = result
+    node.params = params
     
     return node
 end
@@ -191,12 +256,10 @@ function Parser:var_read()
     return node
 end
 
-function Parser:prefix()
+function Parser:prefix(maxLevel: number)
     
-    return self:unpack_op()
-        or self:len_op()
-        or self:not_op()
-        or self:unm_op()
+    return maxLevel >= 2 and self:unpack_op() or self:len_op() or self:not_op()
+        or maxLevel >= 4 and self:unm_op()
 end
 function Parser:unpack_op() -- TODO
 end
@@ -207,13 +270,9 @@ end
 function Parser:unm_op()    -- TODO
 end
 
-function Parser:suffix(base)
+function Parser:suffix(base, maxLevel: number)
     
-    return self:prop_read(base)
-        or self:index_read(base)
-        or self:callment(base)
-        or self:method_callment(base)
-        or self:type_check(base)
+    return maxLevel >= 1 and self:prop_read(base) or self:index_read(base) or self:callment(base) or self:method_callment(base)
 end
 function Parser:prop_read(base)
     
@@ -246,11 +305,14 @@ function Parser:index_read(base)
 end
 function Parser:callment(base)
     
+    local start = self:pos()
+    local generics --= self:type_tuple()
     local params = self:expr_tuple()
-    if not params then return end
+    if not params and not generics then return end
     
     --// End
-    local node = self:node("callment", params.start, true)
+    local node = self:node("callment", start, true)
+    node.generics = generics
     node.params = params
     node.base = base
     
@@ -262,66 +324,136 @@ function Parser:method_callment(base)
     if not self:popChar(":") then return end
     
     local index = self:popIdentifier() or self:report("identifier expected")
+    -- local generics = self:type_tuple()
     local params = self:expr_tuple() or self:report("'(' expected")
     
     --// End
     local node = self:node("method_callment", start, index and params and true)
+    -- node.generics = generics
     node.params = params
     node.index = index
     node.base = base
     
     return node
 end
-function Parser:type_check(base)
-    
-    local start = self:pos()
-    if not self:popKeyword("is") then return end
-    
-    local type = self:type_expr() or self:report("type_expr expected")
-    
-    --// End
-    local node = self:node("type_check", start, type and true)
-    node.type = type
-    node.base = base
-    
-    return node
-end
 
-function Parser:mid(base)
+function Parser:mid(base, maxLevel: number)
     
-    return self:or_op(base)
-        or self:and_op(base)
-        or self:eq_op(base) or self:ne_op(base) or self:lt_op(base) or self:gt_op(base) or self:le(base) or self:ge(base)
-        
-        -- or self:concat_op(base)
-        -- or self:add_op(base) or self:sub_op(base)
-        -- or self:mul_op(base) or self:div_op(base) or self:fdiv_op(base) or self:mod_op(base)
-        -- or self:un_op(base)
-        -- or self:pow_op(base)
+    return maxLevel >= 3 and self:pow_op(base)
+        or maxLevel >= 5 and self:mul_op(base) or self:div_op(base) or self:fdiv_op(base) or self:mod_op(base)
+        or maxLevel >= 6 and self:add_op(base) or self:sub_op(base)
+        or maxLevel >= 7 and self:concat_op(base)
+        or maxLevel >= 8 and self:eq_op(base) or self:ne_op(base) or self:lt_op(base) or self:gt_op(base) or self:le_op(base) or self:ge_op(base)
+        or maxLevel >= 9 and self:and_op(base)
+        or maxLevel >= 10 and self:or_op(base)
 end
-function Parser:or_op(base)
+function Parser:pow_op(base)
     
     local start = self:pos()
-    if not self:popKeyword("or") then return end
+    if not self:popChar("^") then return end
     
-    local value = self:expr() or self:report("expr expected")
+    local value = self:expr(3) or self:report("expr expected")
     
-    --// End
-    local node = self:node("or_op", start, value and true)
+    --// Node
+    local node = self:node("pow_op", start, value and true)
     node.value = value
     node.base = base
     
     return node
 end
-function Parser:and_op(base)
+function Parser:mul_op(base)
     
     local start = self:pos()
-    if not self:popKeyword("and") then return end
+    if not self:popChar("*") then return end
     
-    local value = self:expr() or self:report("expr expected")
+    local value = self:expr(5) or self:report("expr expected")
     
     --// End
-    local node = self:node("and_op", start, value and true)
+    local node = self:node("mul_op", start, value and true)
+    node.value = value
+    node.base = base
+    
+    return node
+end
+function Parser:div_op(base)
+    
+    local start = self:pos()
+    if not self:popChar("/") then return end
+    
+    local value = self:expr(5) or self:report("expr expected")
+    
+    --// Node
+    local node = self:node("div_op", start, value and true)
+    node.value = value
+    node.base = base
+    
+    return node
+end
+function Parser:fdiv_op(base)
+    
+    local start = self:pos()
+    if not self:popOperator("//") then return end
+    
+    local value = self:expr(5) or self:report("expr expected")
+    
+    --// Node
+    local node = self:node("fdiv_op", start, value and true)
+    node.value = value
+    node.base = base
+    
+    return node
+end
+function Parser:mod_op(base)
+    
+    local start = self:pos()
+    if not self:popChar("%") then return end
+    
+    local value = self:expr(5) or self:report("expr expected")
+    
+    --// Node
+    local node = self:node("mod_op", start, value and true)
+    node.value = value
+    node.base = base
+    
+    return node
+end
+function Parser:add_op(base)
+    
+    local start = self:pos()
+    if not self:popChar("+") then return end
+    
+    local value = self:expr(6) or self:report("expr expected")
+    
+    --// End
+    local node = self:node("add_op", start, value and true)
+    node.value = value
+    node.base = base
+    
+    return node
+end
+function Parser:sub_op(base)
+    
+    local start = self:pos()
+    if not self:popChar("-") then return end
+    
+    local value = self:expr(6) or self:report("expr expected")
+    
+    --// Node
+    local node = self:node("sub_op", start, value and true)
+    node.value = value
+    node.base = base
+    
+    return node
+end
+function Parser:concat_op(base)
+    
+    local start = self:pos()
+    if not self:popOperator("..") then return end
+    
+    local value = self:expr(7) or self:report("expr expected")
+    
+    --// Node
+    local node = self:node("concat_op", start, value and true)
     node.value = value
     node.base = base
     
@@ -332,7 +464,7 @@ function Parser:eq_op(base)
     local start = self:pos()
     if not self:popOperator("==") then return end
     
-    local value = self:expr() or self:report("expr expected")
+    local value = self:expr(8) or self:report("expr expected")
     
     --// End
     local node = self:node("eq_op", start, value and true)
@@ -346,7 +478,7 @@ function Parser:ne_op(base)
     local start = self:pos()
     if not self:popOperator("~=") then return end
     
-    local value = self:expr() or self:report("expr expected")
+    local value = self:expr(8) or self:report("expr expected")
     
     --// End
     local node = self:node("ne_op", start, value and true)
@@ -355,13 +487,12 @@ function Parser:ne_op(base)
     
     return node
 end
-
 function Parser:lt_op(base)
     
     local start = self:pos()
     if not self:popChar("<") then return end
     
-    local value = self:expr() or self:report("expr expected")
+    local value = self:expr(8) or self:report("expr expected")
     
     --// End
     local node = self:node("lt_op", start, value and true)
@@ -375,7 +506,7 @@ function Parser:le_op(base)
     local start = self:pos()
     if not self:popOperator("<=") then return end
     
-    local value = self:expr() or self:report("expr expected")
+    local value = self:expr(8) or self:report("expr expected")
     
     --// End
     local node = self:node("le_op", start, value and true)
@@ -389,7 +520,7 @@ function Parser:gt_op(base)
     local start = self:pos()
     if not self:popChar(">") then return end
     
-    local value = self:expr() or self:report("expr expected")
+    local value = self:expr(8) or self:report("expr expected")
     
     --// End
     local node = self:node("gt_op", start, value and true)
@@ -403,7 +534,7 @@ function Parser:ge_op(base)
     local start = self:pos()
     if not self:popOperator(">=") then return end
     
-    local value = self:expr() or self:report("expr expected")
+    local value = self:expr(8) or self:report("expr expected")
     
     --// End
     local node = self:node("ge_op", start, value and true)
@@ -412,30 +543,29 @@ function Parser:ge_op(base)
     
     return node
 end
-
-function Parser:add_op(base)
+function Parser:and_op(base)
     
     local start = self:pos()
-    if not self:popChar("+") then return end
+    if not self:popWord("and") then return end
     
-    local value = self:expr() or self:report("expr expected")
+    local value = self:expr(9) or self:report("expr expected")
     
     --// End
-    local node = self:node("add_op", start, value and true)
+    local node = self:node("and_op", start, value and true)
     node.value = value
     node.base = base
     
     return node
 end
-function Parser:mul_op(base)
+function Parser:or_op(base)
     
     local start = self:pos()
-    if not self:popChar("+") then return end
+    if not self:popWord("or") then return end
     
-    local value = self:expr() or self:report("expr expected")
+    local value = self:expr(10) or self:report("expr expected")
     
     --// End
-    local node = self:node("mul_op", start, value and true)
+    local node = self:node("or_op", start, value and true)
     node.value = value
     node.base = base
     

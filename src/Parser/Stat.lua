@@ -48,13 +48,12 @@ function Parser:def()
     
     repeat
         local decorator = self:decorator()
-        if not decorator then break end
-        
         table.insert(decorators, decorator)
-    until false
+        
+    until not decorator
     
     local level = self:popWord("local") or self:popWord("export")
-    local ctx = { level = level, decorators = decorators, about = comment.content, start = start }
+    local ctx = { level = level, decorators = decorators, about = comment and comment.content, start = start }
     
     return self:function_def(ctx)
         or self:method_def(ctx)
@@ -62,6 +61,7 @@ function Parser:def()
         or self:type_def(ctx)
         or self:var_def(ctx)
 end
+
 function Parser:function_def(ctx)
     
     if not self:popWord("function") then return end
@@ -149,12 +149,12 @@ function Parser:var_def(ctx)
     
     if not ctx.level then return end
     
-    local binding = self:expr_param() or self:report("identifier expected")
+    local binding = self:expr_field() or self:report("identifier expected")
     local bindings = {binding}
     
     while self:popChar(",") do
         
-        binding = self:expr_param() or self:report("identifier expected")
+        binding = self:expr_field() or self:report("identifier expected")
         table.insert(bindings, binding)
     end
     
