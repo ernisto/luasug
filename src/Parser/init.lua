@@ -32,7 +32,14 @@ function TokenStream:parse()
         self:advance()
         return word
     end
-    
+    function self:popOperator(operator: string)
+        
+        local tok = self:pop("operator")
+        if not tok then return end
+        if operator and tok.operator ~= operator then return end
+        
+        return tok
+    end
     function self:popNumber()
         
         return self:popSome("dec_num", "hex_num", "bin_num")
