@@ -4,9 +4,22 @@ local Parser = require("init.lua")
     require("Expr.lua")
 
 --// Nodes
-function Parser:stat()
-
-
+function Parser:body()
+    
+    local start = self:pos()
+    local stats = {}
+    
+    repeat
+        local stat = self:stat()
+        table.insert(stats, stat)
+        
+    until not stat
+    
+    --// Node
+    local node = self:node("body", start, true)
+    node.stats = stats
+    
+    return node
 end
 
 function Parser:def()
