@@ -13,7 +13,7 @@ function Lexer:tokenize()
     
     local diagnostics = {}
     local tokens = {}
-    local index = 0
+    local index = 1
     
     repeat
         local tok = self:scanToken()
