@@ -82,6 +82,31 @@ function Parser:function_def(ctx)
     
     return node
 end
+function Parser:method_def(ctx)
+    
+    if not self:popWord("method") then return end
+    
+    local _tok1 = self:popChar("(") or self:report("'(' expected")
+    local target = self:type_expr() or self:report("type expected")
+    local _tok2 = self:popChar(")") or self:report("')' expected")
+    
+    local name = self:popWord() or self:report("identifier expected")
+    local params = self:expr_params() or self:report("params expected")
+    local body = self:body()
+    local _tok3 = self:popWord("end") or self:report("'end' expected")
+    
+    --// Node
+    local node = self:node("type_def", ctx.start, name and _tok1 and type and _tok2 and _tok3 and true)
+    node.decorators = ctx.decorators
+    node.about = ctx.about
+    node.level = ctx.level
+    node.params = params
+    node.target = target
+    node.body = body
+    node.name = name
+    
+    return node
+end
 function Parser:signal_def(ctx)
     
     if not self:popWord("signal") then return end
