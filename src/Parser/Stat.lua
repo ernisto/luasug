@@ -27,6 +27,19 @@ function Parser:stat()
     return self:def()
         or self:if_stat()
 end
+function Parser:decorator()
+    
+    local start = self:pos()
+    if not self:popChar("@") then return end
+    
+    local expr = self:expr(1) or self:report("expr expected")
+    
+    --// Node
+    local node = self:node("decorator", start, expr and true)
+    node.origin = expr
+    
+    return node
+end
 function Parser:def()
     
     local start = self:pos()
