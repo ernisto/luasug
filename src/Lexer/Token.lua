@@ -170,7 +170,7 @@ function Lexer:scanDecNumber()
         
         rawContent ..= "."..fractional
         
-    elseif #integral == 0 then return rollback() end
+    elseif #integral == 0 then rollback() return end
     
     if self:popChar("e") then
         
@@ -207,9 +207,8 @@ end
 function Lexer:scanBinNumber()
     
     local start = self:pos()
-    local rollback = self:backpoint()
     
-    if not self:popSeq("0b") then return rollback() end
+    if not self:popSeq("0b") then return end
     local integral = ""
     
     local digit = self:popDigit(2)
@@ -230,9 +229,8 @@ end
 function Lexer:scanHexNumber()
     
     local start = self:pos()
-    local rollback = self:backpoint()
     
-    if not self:popSeq("0x") then return rollback() end
+    if not self:popSeq("0x") then return end
     local integral = ""
     
     local digit = self:popDigit(16)
