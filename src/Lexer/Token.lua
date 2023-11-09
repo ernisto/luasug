@@ -270,7 +270,7 @@ function Lexer:scanSimpleString()
     
     repeat
         local char = self:popChar()
-        if not char then break end
+        if not char or char == beg then break end
         
         content ..= char
         
