@@ -198,9 +198,9 @@ function Lexer:scanDecNumber()
     --// Token
     local token = self:newToken("dec_num", start)
     token.rawContent = if sign < 0 then "-"..rawContent else rawContent
-    token.fractional = tonumber(fractional)
-    token.exponent = tonumber(exponent)
-    token.integral = tonumber(integral)
+    token.fractional = fractional
+    token.exponent = exponent
+    token.integral = integral
     token.exponentSign = exponentSign
     token.sign = sign
     token.type = type
@@ -228,7 +228,7 @@ function Lexer:scanBinNumber()
     
     local token = self:newToken("bin_num", start)
     token.rawContent = if sign < 0 then "-"..integral else integral
-    token.integral = tonumber(integral, 2)
+    token.integral = integral
     token.sign = sign
     
     return token
@@ -253,7 +253,7 @@ function Lexer:scanHexNumber()
     
     local token = self:newToken("hex_num", start)
     token.rawContent = if sign < 0 then "-"..integral else integral
-    token.integral = tonumber(integral, 16)
+    token.integral = integral
     token.sign = sign
     
     return token

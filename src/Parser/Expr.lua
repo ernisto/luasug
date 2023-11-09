@@ -159,11 +159,11 @@ function Parser:number()
     
     --// Node
     local node = self:node("number", number.start, true)
-    node.decimal = number.decimal or 0
-    node.fractional = number.fractional or 0
-    node.exponent = number.exponent or 0
+    node.value = tonumber(number.rawContent, number.radix)
+    node.decimal = tonumber(number.decimal)
+    node.fractional = tonumber(number.fractional)
+    node.exponent = tonumber(number.exponent)
     node.type = number.type
-    node.value = (node.decimal + node.fractional)*10^node.exponent
     
     return node
 end
