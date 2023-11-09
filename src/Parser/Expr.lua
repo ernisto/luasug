@@ -312,13 +312,11 @@ end
 function Parser:callment(base)
     
     local start = self:pos()
-    local generics --= self:type_tuple()
     local params = self:expr_tuple()
-    if not params and not generics then return end
+    if not params then return end
     
     --// End
     local node = self:node("callment", start, true)
-    node.generics = generics
     node.params = params
     node.base = base
     
@@ -330,12 +328,10 @@ function Parser:method_callment(base)
     if not self:popChar(":") then return end
     
     local index = self:popIdentifier() or self:report("identifier expected")
-    -- local generics = self:type_tuple()
     local params = self:expr_tuple() or self:report("'(' expected")
     
     --// End
     local node = self:node("method_callment", start, index and params and true)
-    -- node.generics = generics
     node.params = params
     node.index = index
     node.base = base
