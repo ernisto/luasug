@@ -46,6 +46,7 @@ function Lexer.new(source: string)
 	function self:popDigit(radix: number?): string
 		
 		local char = chars[index]
+		if not char then return end
 		if not tonumber(char, radix) then return end
 		
 		index += 1
