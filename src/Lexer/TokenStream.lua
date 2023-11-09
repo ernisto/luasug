@@ -68,6 +68,8 @@ function Lexer:tokenize()
     function self:peekSome(...: string)
         
         local tok = self:peek()
+        if not tok then return end
+        
         for _,kind in {...} do
             
             if tok.kind == kind then return tok end
