@@ -127,11 +127,11 @@ function Parser:atom()
     
     return self:null()
         or self:func()
+        or self:bool()
         or self:array()
         or self:table()
         or self:number()
         or self:string()
-        or self:boolean()
         or self:var_read()
         or self:arrow_func()
         or self:expr_tuple()
@@ -145,14 +145,14 @@ function Parser:null()
     local node = self:node("null", start, true)
     return node
 end
-function Parser:boolean()
+function Parser:bool()
     
     local start = self:pos()
     local word = self:popWord("true") or self:popWord("false")
     if not word then return end
     
     --// Node
-    local node = self:node("boolean", start, true)
+    local node = self:node("bool", start, true)
     node.value = word == "true"
     
     return node
