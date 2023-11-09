@@ -126,10 +126,14 @@ end
 function Parser:atom()
     
     return self:null()
+        or self:func()
+        or self:array()
+        or self:table()
         or self:number()
         or self:string()
         or self:boolean()
         or self:var_read()
+        or self:arrow_func()
         or self:expr_tuple()
 end
 function Parser:null()
