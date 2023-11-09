@@ -138,7 +138,6 @@ function Lexer:scanDecNumber()
     
     local start = self:pos()
     local rollback = self:backpoint()
-    local sign = if self:popChar("-") then -1 elseif self:popChar("+") then 1 else 1
     
     local fractional = ""
     local integral = ""
@@ -156,7 +155,6 @@ function Lexer:scanDecNumber()
     
     local rawContent = integral
     
-    while self:popChar("_") do end
     if self:popChar(".") then
         
         while self:popChar("_") do end
@@ -174,7 +172,6 @@ function Lexer:scanDecNumber()
         
     elseif #integral == 0 then return rollback() end
     
-    while self:popChar("_") do end
     if self:popChar("e") then
         
         exponentSign = if self:popChar("-") then -1 elseif self:popChar("+") then 1 else 1
@@ -197,12 +194,11 @@ function Lexer:scanDecNumber()
     
     --// Token
     local token = self:newToken("dec_num", start)
-    token.rawContent = if sign < 0 then "-"..rawContent else rawContent
+    token.rawContent = rawContent
     token.fractional = fractional
     token.exponent = exponent
     token.integral = integral
     token.exponentSign = exponentSign
-    token.sign = sign
     token.type = type
     token.radix = 10
     
@@ -212,7 +208,6 @@ function Lexer:scanBinNumber()
     
     local start = self:pos()
     local rollback = self:backpoint()
-    local sign = if self:popChar("-") then -1 elseif self:popChar("+") then 1 else 1
     
     if not self:popSeq("0b") then return rollback() end
     local integral = ""
@@ -227,9 +222,8 @@ function Lexer:scanBinNumber()
     end
     
     local token = self:newToken("bin_num", start)
-    token.rawContent = if sign < 0 then "-"..integral else integral
+    token.rawContent = integral
     token.integral = integral
-    token.sign = sign
     
     return token
 end
@@ -237,7 +231,6 @@ function Lexer:scanHexNumber()
     
     local start = self:pos()
     local rollback = self:backpoint()
-    local sign = if self:popChar("-") then -1 elseif self:popChar("+") then 1 else 1
     
     if not self:popSeq("0x") then return rollback() end
     local integral = ""
@@ -252,9 +245,8 @@ function Lexer:scanHexNumber()
     end
     
     local token = self:newToken("hex_num", start)
-    token.rawContent = if sign < 0 then "-"..integral else integral
+    token.rawContent = integral
     token.integral = integral
-    token.sign = sign
     
     return token
 end
