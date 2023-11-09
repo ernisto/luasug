@@ -143,11 +143,12 @@ function Parser:null()
 end
 function Parser:boolean()
     
+    local start = self:pos()
     local word = self:popWord("true") or self:popWord("false")
     if not word then return end
     
     --// Node
-    local node = self:node("boolean", word.start, true)
+    local node = self:node("boolean", start, true)
     node.value = word == "true"
     
     return node
