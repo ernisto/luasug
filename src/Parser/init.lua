@@ -30,7 +30,7 @@ function TokenStream:parse()
         if word and tok.word ~= word then return end
         
         self:advance()
-        return word
+        return tok.word
     end
     function self:popOperator(operator: string?)
         
