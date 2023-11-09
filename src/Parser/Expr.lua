@@ -161,7 +161,7 @@ function Parser:number()
     --// Node
     local node = self:node("number", number.start, true)
     node.value = tonumber(number.rawContent, number.radix)
-    node.decimal = tonumber(number.decimal)
+    node.integral = tonumber(number.integral)
     node.fractional = tonumber(number.fractional)
     node.exponent = tonumber(number.exponent)
     node.type = number.type
