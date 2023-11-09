@@ -14,7 +14,7 @@ function Lexer:newToken(kind: string, start: pos)
     local token = setmetatable({
         kind = kind,
         start = start,
-        final = self:pos()
+        final = self:pos(-1)
     }, Token)
     
     self:skipBlank()

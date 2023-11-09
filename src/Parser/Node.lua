@@ -12,7 +12,7 @@ Node.__index = Node
 function Parser:node(kind: string, start: pos, isValid: boolean)
     
     local node = setmetatable({
-        final = self:pos(),
+        final = self:pos(-1),
         isValid = isValid,
         start = start,
         kind = kind,

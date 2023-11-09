@@ -26,12 +26,21 @@ function Lexer:tokenize()
     --// Methods
     function self:report(message: string)
         
-        local diagnostic = { message = message, begin = self:pos(), final = (self:peek() or tokens[#tokens]).final }
+        local badTok = self:peek() or tokens[#tokens]
+        local diagnostic = { message = message, begin = badTok.start, final = badTok.final }
         table.insert(diagnostics, diagnostic)
     end
-    function self:pos()
+    function self:pos(offset: number?)
         
-        return (self:peek() or tokens[#tokens]).start
+        if offset == -1 then
+            
+            local lastTok = tokens[index-1] or tokens[1]
+            return lastTok.final
+        else
+            
+            local tok = (self:peek() or tokens[#tokens])
+            return tok.start
+        end
     end
     
     function self:backpoint()

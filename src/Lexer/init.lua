@@ -74,9 +74,15 @@ function Lexer.new(source: string)
 			return self
 		end
 	end
-	function self:pos(): pos
+	function self:pos(offset: number?): pos
 		
-		return setmetatable({ absolute = index, column = index - lineStart + 1, line = lines }, pos)
+		if offset == -1 then
+			
+			return setmetatable({ absolute = index-1, column = index - lineStart, line = lines }, pos)
+		else
+			
+			return setmetatable({ absolute = index, column = index - lineStart + 1, line = lines }, pos)
+		end
 	end
 	
 	function self:skipBlank()
