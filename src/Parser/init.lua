@@ -16,7 +16,7 @@ function TokenStream:parse()
     --// Methods
     function self:popChar(char: string?)
         
-        local tok = self:pop("char")
+        local tok = self:peek("char")
         if not tok then return end
         if char and tok.char ~= char then return end
         
@@ -25,19 +25,20 @@ function TokenStream:parse()
     end
     function self:popWord(word: string?)
         
-        local tok = self:pop("word")
+        local tok = self:peek("word")
         if not tok then return end
         if word and tok.word ~= word then return end
         
         self:advance()
         return word
     end
-    function self:popOperator(operator: string)
+    function self:popOperator(operator: string?)
         
-        local tok = self:pop("operator")
+        local tok = self:peek("operator")
         if not tok then return end
         if operator and tok.operator ~= operator then return end
         
+        self:advance()
         return tok
     end
     function self:popNumber()
