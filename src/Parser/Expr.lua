@@ -170,12 +170,12 @@ function Parser:number()
 end
 function Parser:string()
     
-    local content = self:popString()
-    if not content then return end
+    local str = self:popString()
+    if not str then return end
     
     --// Node
-    local node = self:node("string", content.start, true)
-    node.content = content
+    local node = self:node("string", str.start, true)
+    node.content = str.content
     
     return node
 end
