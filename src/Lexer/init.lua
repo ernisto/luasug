@@ -127,11 +127,13 @@ function Lexer.new(source: string)
 			if char == nextEndChar then
 				
 				endMatchCount += 1
-				if endMatchCount == endMatchGoal then return content end
+				nextEndChar = ender:sub(endMatchCount+1, endMatchCount+1)
+				
+				if endMatchCount >= endMatchGoal then return content end
 			else
 				
 				endMatchCount = 0
-				content ..= char
+				content ..= ender:sub(1, endMatchCount)..char
 			end
 		end
 	end
