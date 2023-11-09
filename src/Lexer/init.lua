@@ -84,6 +84,10 @@ function Lexer.new(source: string)
 			return setmetatable({ absolute = index, column = index - lineStart + 1, line = lines }, pos)
 		end
 	end
+	function self:sub(init: number, final: number)
+		
+		return source:sub(init, final)
+	end
 	
 	function self:skipBlank()
 		

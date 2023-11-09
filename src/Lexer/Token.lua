@@ -11,10 +11,13 @@ Token.__index = Token
 --// Factory
 function Lexer:newToken(kind: string, start: pos)
     
+    local final = self:pos(-1)
+    
     local token = setmetatable({
         kind = kind,
         start = start,
-        final = self:pos(-1)
+        final = final,
+        raw = self:sub(start.absolute, final.absolute),
     }, Token)
     
     self:skipBlank()
