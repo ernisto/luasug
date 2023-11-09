@@ -224,9 +224,10 @@ function Parser:func()
         resultType = self:type_expr()
     end
     local body = self:body()
+    local _tok = self:popWord("end") or self:report("'end' expected")
     
     --// Node
-    local node = self:node("func", start, params and true)
+    local node = self:node("func", start, params and _tok and true)
     node.resultType = resultType
     node.params = params
     node.body = body
