@@ -252,11 +252,13 @@ function Parser:arrow_func()
 end
 function Parser:var_read()
     
+    local start = self:pos()
+    
     local name = self:popWord()
     if not name then return end
     
     --// Node
-    local node = self:node("var_read", name.start, true)
+    local node = self:node("var_read", start, true)
     node.name = name
     
     return node
