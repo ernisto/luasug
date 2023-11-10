@@ -115,7 +115,13 @@ function Parser:expr(maxLevel: number?)
     if not base then return end
     
     repeat
-        local op = self:suffix(base, maxLevel) or self:mid(base, maxLevel)
+        local op = self:suffix(base, maxLevel)
+        if op then base = op end
+        
+    until not op
+    
+    repeat
+        local op = self:mid(base, maxLevel)
         if op then base = op end
         
     until not op
@@ -287,7 +293,7 @@ function Parser:prop_read(base)
     local start = self:pos()
     if not self:popChar(".") then return end
     
-    local name = self:popIdentifier()
+    local name = self:popWord() or self:report("identifier expected")
     
     --// End
     local node = self:node("prop_read", start, name and true)
@@ -329,7 +335,7 @@ function Parser:method_callment(base)
     local start = self:pos()
     if not self:popChar(":") then return end
     
-    local index = self:popIdentifier() or self:report("identifier expected")
+    local index = self:popWord() or self:report("identifier expected")
     local params = self:expr_tuple() or self:report("'(' expected")
     
     --// End
