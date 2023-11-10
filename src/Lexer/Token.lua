@@ -160,13 +160,15 @@ function Lexer:scanDecNumber()
         while self:popChar("_") do end
         digit = self:popDigit()
         
-        while digit do
-            
+        if not digit and #integral == 0 then rollback() return end
+        
+        repeat
             fractional ..= digit
             
             while self:popChar("_") do end
             digit = self:popDigit()
-        end
+            
+        until not digit
         
         rawContent ..= "."..fractional
         
