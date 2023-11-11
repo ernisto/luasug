@@ -10,6 +10,7 @@
     "editor.defaultFormatter": "JohnnyMorganz.stylua"
   },
   "robloxLsp.diagnostics.disable": [
-    "undefined-type"
+    "undefined-type",
+    "unused-local"
   ]
 }
