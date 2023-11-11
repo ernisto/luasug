@@ -24,6 +24,18 @@ function Lexer:tokenize()
     local self = setmetatable({ diagnostics = diagnostics, tokens = tokens }, TokenStream)
     
     --// Methods
+    function self:printTokens()
+        
+        local formatedTokens = {}
+        
+        for index, token in tokens do
+            
+            formatedTokens[index] = `{token.kind}('{token.raw:gsub("\n", "\\n")}')`
+        end
+        
+        return "[\n\t"..table.concat(formatedTokens, ",\n\t").."\n]"
+    end
+    
     function self:report(message: string)
         
         local badTok = self:peek() or tokens[#tokens]
