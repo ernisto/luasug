@@ -104,7 +104,7 @@ function Lexer:scanOperator()
     
     local str = self:peek(2)
     local isAssignment = false
-    local op = str:match("[%+%-%*%/%^%%]")
+    local op = str:match("([%+%-%*%/%^%%])[^>]")
         or str == "//" or str == ".." and str
     
     if op then
