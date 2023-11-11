@@ -10,30 +10,26 @@ function Parser:expr_tuple_def()
     local isValid = true
     local fields = {}
     
-    if self:popChar("(") then
+    if not self:popChar("(") then return end
+    
+    local field = self:expr_field_def()
+    table.insert(fields, field)
+    
+    while isValid and self:popChar(",") do
         
-        local field = self:expr_field_def()
+        field = self:expr_field_def() or self:report("field expected")
         table.insert(fields, field)
         
-        while isValid and self:popChar(",") do
-            
-            field = self:expr_field_def() or self:report("field expected")
-            table.insert(fields, field)
-            
-            isValid = isValid and field and true
-        end
-        
-        local _token = self:popChar(")") or self:report("')' expected")
-        isValid = _token and isValid
-    else
-        
-        if not generics then return end
+        isValid = field and isValid
     end
+    
+    local _token = self:popChar(")") or self:report("')' expected")
+    isValid = _token and isValid
     
     --// Node
     local node = self:node("expr_tuple_def", start, isValid)
-    self.generics = generics
-    self.fields = fields
+    node.generics = generics
+    node.fields = fields or error("cavalo")
     
     return node
 end
@@ -61,10 +57,10 @@ function Parser:expr_field_def()
     
     --// Node
     local node = self:node("expr_field_def", start, isValid)
-    self.isVariadic = isVariadic
-    self.default = default
-    self.type = type
-    self.name = name
+    node.isVariadic = isVariadic
+    node.default = default
+    node.type = type
+    node.name = name
     
     return node
 end
@@ -94,8 +90,8 @@ function Parser:expr_tuple()
     
     --// Node
     local node = self:node("expr_tuple", start, isValid)
-    self.generics = generics
-    self.fields = fields
+    node.generics = generics
+    node.fields = fields
     
     return node
 end
