@@ -59,7 +59,7 @@ function Lexer.new(source: string)
 	
 	function self:peek(length: number): string
 		
-		return if length then table.concat(chars, index, index + length - 1)
+		return if length then source:sub(index, index+length-1)
 			else chars[index]
 	end
 	function self:advance(length: number)
