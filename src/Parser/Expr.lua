@@ -276,6 +276,16 @@ end
 function Parser:len_op()    -- TODO
 end
 function Parser:not_op()    -- TODO
+
+    local start = self:pos()
+    local word = self:popWord("not")
+    if not word then return end
+
+    --// Node
+    local node = self:node("not_op", start, true)
+    node.base = self:expr() or self:report("expr expected")
+
+    return node
 end
 function Parser:unm_op()    -- TODO
 end
