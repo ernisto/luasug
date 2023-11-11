@@ -1,6 +1,8 @@
 --// Packages
-local Parser = require("init.lua")
 local Node = require("Node.lua")
+
+local Parser = require("init.lua")
+    require("Type.lua")
 
 --// Nodes
 function Parser:expr_tuple_def()

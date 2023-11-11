@@ -1,6 +1,7 @@
 --// Packages
 local Node = require("Node.lua")
 local Parser = require("init.lua")
+    require("Type.lua")
     require("Expr.lua")
 
 --// Nodes
@@ -130,7 +131,7 @@ function Parser:type_def(ctx)
     if not self:popWord("type") then return end
     
     local name = self:popWord() or self:report("identifier expected")
-    local generics = self:type_params()
+    local generics = self:type_tuple_def()
     local _token = self:popChar("=") or self:report("'=' expected")
     local type = self:type_expr()
     
@@ -149,12 +150,12 @@ function Parser:var_def(ctx)
     
     if not ctx.level then return end
     
-    local binding = self:expr_field() or self:report("identifier expected")
+    local binding = self:expr_field_def() or self:report("identifier expected")
     local bindings = {binding}
     
     while self:popChar(",") do
         
-        binding = self:expr_field() or self:report("identifier expected")
+        binding = self:expr_field_def() or self:report("identifier expected")
         table.insert(bindings, binding)
     end
     
