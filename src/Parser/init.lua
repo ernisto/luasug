@@ -69,6 +69,7 @@ function TokenStream:parse()
     end
     
     --// End
+    lastComment = self:pop("comment")
     return self
 end
 
