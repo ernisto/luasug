@@ -67,12 +67,12 @@ function Parser:function_def(ctx)
     if not self:popWord("function") then return end
     
     local name = self:popWord() or self:report("identifier expected")
-    local params = self:expr_tuple_def() or self:report("params expected")
+    local params = self:expr_tuple_def() or self:report("'(' expected")
     local body = self:body()
     local _token = self:popWord("end") or self:report("'end' expected")
     
     --// Node
-    local node = self:node("type_def", ctx.start, name and _token and true)
+    local node = self:node("function_def", ctx.start, name and params and _token and true)
     node.decorators = ctx.decorators
     node.about = ctx.about
     node.level = ctx.level
@@ -96,7 +96,7 @@ function Parser:method_def(ctx)
     local _tok3 = self:popWord("end") or self:report("'end' expected")
     
     --// Node
-    local node = self:node("type_def", ctx.start, name and _tok1 and type and _tok2 and _tok3 and true)
+    local node = self:node("method_def", ctx.start, name and _tok1 and type and _tok2 and _tok3 and true)
     node.decorators = ctx.decorators
     node.about = ctx.about
     node.level = ctx.level
