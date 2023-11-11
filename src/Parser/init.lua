@@ -59,13 +59,10 @@ function TokenStream:parse()
     local advanceTokenStream = self.advance
     function self:advance()
         
-        repeat
-            advanceTokenStream(self)
-            
-            local comment = self:pop("comment")
-            if comment then lastComment = comment end
-            
-        until not comment
+        advanceTokenStream(self)
+        
+        local comment = self:pop("comment") -- recursive :advance()
+        if comment then lastComment = comment end
     end
     
     --// End
