@@ -115,7 +115,7 @@ function Lexer:scanOperator()
         elseif self:popChar("=") then isAssignment = true end
     else
         
-        op = self:popChar("=") or self:popChar(">") or self:popChar("<")
+        op = self:popChar("=")
             or str == "->" or str == "=>"
             or str == "==" or str == "~="
             or str == ">=" or str == "<="
