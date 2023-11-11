@@ -272,8 +272,8 @@ end
 
 function Parser:prefix(maxLevel: number)
     
-    return maxLevel >= 2 and self:unpack_op() or self:len_op() or self:not_op()
-        or maxLevel >= 4 and self:unm_op()
+    return maxLevel >= 2 and(self:unpack_op() or self:len_op())
+        or maxLevel >= 4 and(self:unm_op() or self:not_op())
 end
 function Parser:unpack_op() -- TODO
 end
@@ -286,7 +286,7 @@ end
 
 function Parser:suffix(base, maxLevel: number)
     
-    return maxLevel >= 1 and self:prop_read(base) or self:index_read(base) or self:callment(base) or self:method_callment(base)
+    return maxLevel >= 1 and (self:prop_read(base) or self:index_read(base) or self:callment(base) or self:method_callment(base))
 end
 function Parser:prop_read(base)
     
@@ -349,18 +349,18 @@ end
 
 function Parser:mid(base, maxLevel: number)
     
-    return maxLevel >= 3 and self:pow_op(base)
-        or maxLevel >= 5 and self:mul_op(base) or self:div_op(base) or self:fdiv_op(base) or self:mod_op(base)
-        or maxLevel >= 6 and self:add_op(base) or self:sub_op(base)
-        or maxLevel >= 7 and self:concat_op(base)
-        or maxLevel >= 8 and self:eq_op(base) or self:ne_op(base) or self:lt_op(base) or self:gt_op(base) or self:le_op(base) or self:ge_op(base)
-        or maxLevel >= 9 and self:and_op(base)
-        or maxLevel >= 10 and self:or_op(base)
+    return maxLevel >= 3 and self:pow_op(base)  -- right associative op idk bcuz
+        or maxLevel > 5 and(self:mul_op(base) or self:div_op(base) or self:fdiv_op(base) or self:mod_op(base))
+        or maxLevel > 6 and(self:add_op(base) or self:sub_op(base))
+        or maxLevel >= 7 and self:concat_op(base)  -- right associative op idk bcuz
+        or maxLevel > 8 and(self:eq_op(base) or self:ne_op(base) or self:lt_op(base) or self:gt_op(base) or self:le_op(base) or self:ge_op(base))
+        or maxLevel > 9 and self:and_op(base)
+        or maxLevel > 10 and self:or_op(base)
 end
 function Parser:pow_op(base)
     
     local start = self:pos()
-    if not self:popChar("^") then return end
+    if not self:popOperator("^") then return end
     
     local value = self:expr(3) or self:report("expr expected")
     
@@ -374,7 +374,7 @@ end
 function Parser:mul_op(base)
     
     local start = self:pos()
-    if not self:popChar("*") then return end
+    if not self:popOperator("*") then return end
     
     local value = self:expr(5) or self:report("expr expected")
     
@@ -388,7 +388,7 @@ end
 function Parser:div_op(base)
     
     local start = self:pos()
-    if not self:popChar("/") then return end
+    if not self:popOperator("/") then return end
     
     local value = self:expr(5) or self:report("expr expected")
     
@@ -416,7 +416,7 @@ end
 function Parser:mod_op(base)
     
     local start = self:pos()
-    if not self:popChar("%") then return end
+    if not self:popOperator("%") then return end
     
     local value = self:expr(5) or self:report("expr expected")
     
@@ -430,7 +430,7 @@ end
 function Parser:add_op(base)
     
     local start = self:pos()
-    if not self:popChar("+") then return end
+    if not self:popOperator("+") then return end
     
     local value = self:expr(6) or self:report("expr expected")
     
@@ -444,7 +444,7 @@ end
 function Parser:sub_op(base)
     
     local start = self:pos()
-    if not self:popChar("-") then return end
+    if not self:popOperator("-") then return end
     
     local value = self:expr(6) or self:report("expr expected")
     
@@ -500,7 +500,7 @@ end
 function Parser:lt_op(base)
     
     local start = self:pos()
-    if not self:popChar("<") then return end
+    if not self:popOperator("<") then return end
     
     local value = self:expr(8) or self:report("expr expected")
     
@@ -528,7 +528,7 @@ end
 function Parser:gt_op(base)
     
     local start = self:pos()
-    if not self:popChar(">") then return end
+    if not self:popOperator(">") then return end
     
     local value = self:expr(8) or self:report("expr expected")
     
