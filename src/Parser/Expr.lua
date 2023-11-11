@@ -105,7 +105,7 @@ end
 
 function Parser:expr(maxLevel: number?)
     
-    maxLevel = maxLevel or 10
+    maxLevel = maxLevel or 11
     
     local base = self:prefix(maxLevel) or self:atom()
     if not base then return end
