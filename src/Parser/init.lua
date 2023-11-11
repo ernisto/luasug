@@ -32,11 +32,14 @@ function TokenStream:parse()
         self:advance()
         return tok.word
     end
-    function self:popOperator(operator: string?)
+    function self:popOperator(operator: string?, isAssignment: boolean?)
+        
+        isAssignment = isAssignment or false
         
         local tok = self:peek("operator")
         if not tok then return end
         if operator and tok.operator ~= operator then return end
+        if tok.isAssignment ~= isAssignment then return end
         
         self:advance()
         return tok
