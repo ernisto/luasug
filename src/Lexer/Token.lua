@@ -121,10 +121,10 @@ function Lexer:scanOperator()
     elseif self:popChar("=") then isAssignment = true op = "="
     else
         
-        op  =  str == "->" or str == "=>"
+        op = if str == "->" or str == "=>"
             or str == "==" or str == "~="
             or str == ">=" or str == "<="
-            and str
+            then str else nil
         
         if not op then return end
         self:advance(#op)
