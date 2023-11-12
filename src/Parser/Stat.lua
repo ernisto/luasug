@@ -20,6 +20,8 @@ function Parser:body(...: string)
         local stat = self:stat()
         table.insert(stats, stat)
         
+        self:popChar(";")
+        
     until not stat or stat.kind == "return_stat" or stat.kind == "break_stat" or stat.kind == "continue_stat"
     
     if not isValid and #enders > 0 then self:report(`'{table.concat(enders, "' or '")}' expected`) end

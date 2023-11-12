@@ -197,12 +197,10 @@ function Parser:array()
     local values = {value}
     local isValid = true
     
-    while isValid and self:popChar(",") do
+    while value and self:popChar(",") do
         
         value = self:expr() or self:report("expr expected")
         table.insert(values, value)
-        
-        isValid = value and isValid
     end
     
     local _tok = self:popChar("]") or self:report("']' expected")
@@ -277,10 +275,8 @@ function Parser:table()
     
     while field and self:popChar(",") do
         
-        field = self:def_stat() or self:expr_field_def(true) or self:expr_indexer() or self:type_indexer() or self:expr() or self:report("field expected")
+        field = self:def_stat() or self:expr_field_def(true) or self:expr_indexer() or self:type_indexer() or self:expr()
         table.insert(fields, field)
-        
-        isValid = field and isValid
     end
     
     local _tok = self:popChar("}") or self:report("'}' expected")
