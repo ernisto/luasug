@@ -210,7 +210,6 @@ function Parser:signal_def(ctx)
     node.about = ctx.about
     node.level = ctx.level
     node.params = params
-    node.type = type
     node.name = name
     
     return node
