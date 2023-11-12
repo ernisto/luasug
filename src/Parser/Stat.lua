@@ -14,7 +14,7 @@ function Parser:body(...: string)
     local stats = {}
     
     repeat
-        local word = self:peek("word").word
+        local word = self:peek("word") word = word and word.word
         if word and table.find(enders, word) then isValid = true break end
         
         local stat = self:stat()
@@ -22,7 +22,7 @@ function Parser:body(...: string)
         
     until not stat or stat.kind == "return_stat" or stat.kind == "break_stat" or stat.kind == "continue_stat"
     
-    if not isValid then self:report(`'{table.concat(enders, "' or '")}' expected`) end
+    if not isValid and #enders > 0 then self:report(`'{table.concat(enders, "' or '")}' expected`) end
     
     --// Node
     local node = self:node("body", start, isValid)
@@ -39,6 +39,8 @@ function Parser:stat()
     if regular then return regular end
     
     local base = self:expr(1)
+    if not base then return end
+    
     if base.kind == "callment" or base.kind == "method_callment" then
         
         return base
@@ -220,7 +222,7 @@ function Parser:type_def(ctx)
     
     local name = self:popWord() or self:report("identifier expected")
     local generics = self:type_tuple_def()
-    local _token = self:popChar("=") or self:report("'=' expected")
+    local _token = self:popOperator("=", true) or self:report("'=' expected")
     local type = self:type_expr()
     
     --// Node
