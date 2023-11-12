@@ -35,9 +35,10 @@ function Parser:expr_tuple_def()
     
     return node
 end
-function Parser:expr_field_def()
+function Parser:expr_field_def(requireInfo: boolean)
     
     local start = self:pos()
+    local rollback = self:backpoint()
     local isVariadic = self:popOperator("...") ~= nil
     local isValid = true
     
@@ -55,7 +56,8 @@ function Parser:expr_field_def()
         
         default = self:expr() or self:report("expr expected")
         isValid = default and isValid
-    end
+        
+    elseif requireInfo and not type then rollback() return end
     
     --// Node
     local node = self:node("expr_field_def", start, isValid)
@@ -186,8 +188,6 @@ function Parser:string()
     
     return node
 end
-function Parser:table() -- TODO
-end
 function Parser:array()
     
     local start = self:pos()
@@ -263,6 +263,67 @@ function Parser:var_read()
     --// Node
     local node = self:node("var_read", start, true)
     node.name = name
+    
+    return node
+end
+function Parser:table()
+    
+    local start = self:pos()
+    if not self:popChar("{") then return end
+    
+    local field = self:def_stat() or self:expr_field_def(true) or self:expr_indexer() or self:type_indexer() or self:expr()
+    local fields = {field}
+    local isValid = true
+    
+    while field and self:popChar(",") do
+        
+        field = self:def_stat() or self:expr_field_def(true) or self:expr_indexer() or self:type_indexer() or self:expr() or self:report("field expected")
+        table.insert(fields, field)
+        
+        isValid = field and isValid
+    end
+    
+    local _tok = self:popChar("}") or self:report("'}' expected")
+    
+    --// Node
+    local node = self:node("table", start, _tok and isValid)
+    node.fields = fields
+    
+    return node
+end
+function Parser:expr_indexer()
+    
+    local start = self:pos()
+    local rollback = self:backpoint()
+    if not self:popChar("[") then return end
+    
+    local index = self:expr() or self:report("expr expected")
+    local _tok = self:popChar("]") or self:report("']' expected")
+    
+    if not self:popOperator("=", true) then rollback() return end
+    local value = self:expr() or self:report("expr expected")
+    
+    --// Node
+    local node = self:node("expr_indexer", start, _tok and true)
+    node.index = index
+    node.value = value
+    
+    return node
+end
+function Parser:type_indexer()
+    
+    local start = self:pos()
+    if not self:popChar("[") then return end
+    
+    local index = self:type_field() or self:report("identifier expected")
+    local _tok = self:popChar("]") or self:report("']' expected")
+    local _tok2 = self:popChar(":") or self:report("':' or '=' expected")
+    local value = self:type_expr() or self:report("type expected")
+    
+    --// Node
+    local node = self:node("type_indexer", start, _tok and _tok2 and true)
+    node.index = index
+    node.value = value
     
     return node
 end
