@@ -11,6 +11,7 @@ TokenStream.__index = TokenStream
 --// Factory
 function Lexer:tokenize()
     
+    local lexer = self
     local diagnostics = {}
     local tokens = {}
     local index = 1
@@ -22,6 +23,20 @@ function Lexer:tokenize()
     
     --// Instance
     local self = setmetatable({ diagnostics = diagnostics, tokens = tokens }, TokenStream)
+    
+    local Diagnostic = {}
+    Diagnostic.__index = Diagnostic
+    
+    function Diagnostic:printError()
+        
+        local fullLine = lexer:sub(self.begin.absolute - self.begin.column + 1, self.final.absolute)
+        print(
+            fullLine..'\n'
+            ..string.rep(" ", self.begin.column - 2)
+            ..string.rep("^", self.final.absolute - self.begin.absolute + 1)
+            .." "..self.message
+        )
+    end
     
     --// Methods
     function self:printTokens()
@@ -39,7 +54,7 @@ function Lexer:tokenize()
     function self:report(message: string)
         
         local badTok = self:peek() or tokens[#tokens]
-        local diagnostic = { message = `{message}, got {badTok}`, begin = badTok.start, final = badTok.final }
+        local diagnostic = setmetatable({ message = `{message}, got {badTok}`, begin = badTok.start, final = badTok.final }, Diagnostic)
         table.insert(diagnostics, diagnostic)
     end
     function self:pos(offset: number?)
