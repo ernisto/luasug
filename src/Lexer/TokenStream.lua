@@ -30,7 +30,7 @@ function Lexer:tokenize()
         
         for index, token in tokens do
             
-            formatedTokens[index] = `{token.kind}('{token.raw:gsub("\n", "\\n")}')`
+            formatedTokens[index] = tostring(token)
         end
         
         return "[\n\t"..table.concat(formatedTokens, ",\n\t").."\n]"
@@ -39,7 +39,7 @@ function Lexer:tokenize()
     function self:report(message: string)
         
         local badTok = self:peek() or tokens[#tokens]
-        local diagnostic = { message = message, begin = badTok.start, final = badTok.final }
+        local diagnostic = { message = `{message}, got {badTok}`, begin = badTok.start, final = badTok.final }
         table.insert(diagnostics, diagnostic)
     end
     function self:pos(offset: number?)

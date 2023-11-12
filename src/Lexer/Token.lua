@@ -23,6 +23,10 @@ function Lexer:newToken(kind: string, start: pos)
     self:skipBlank()
     return token
 end
+function Token:__tostring()
+    
+    return `{self.kind}('{self.raw:gsub("\n", "\\n")}')`
+end
 
 --// Utils
 function Lexer:popWord(): string?
