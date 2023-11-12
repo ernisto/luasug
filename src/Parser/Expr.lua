@@ -31,7 +31,7 @@ function Parser:expr_tuple_def()
     --// Node
     local node = self:node("expr_tuple_def", start, isValid)
     node.generics = generics
-    node.fields = fields or error("cavalo")
+    node.fields = fields
     
     return node
 end
@@ -335,23 +335,57 @@ function Parser:prefix(maxLevel: number)
     return maxLevel >= 2 and(self:unpack_op() or self:len_op())
         or maxLevel >= 4 and(self:unm_op() or self:not_op())
 end
-function Parser:unpack_op() -- TODO
-end
-function Parser:len_op()    -- TODO
-end
-function Parser:not_op()    -- TODO
-
+function Parser:unpack_op()
+    
     local start = self:pos()
-    local word = self:popWord("not")
-    if not word then return end
-
+    if not self:popOperator("...") then return end
+    
+    local base = self:expr() or self:report("expr expected")
+    
     --// Node
-    local node = self:node("not_op", start, true)
-    node.base = self:expr() or self:report("expr expected")
-
+    local node = self:node("unpack_op", start, base and true)
+    node.base = base
+    
     return node
 end
-function Parser:unm_op()    -- TODO
+function Parser:len_op()
+    
+    local start = self:pos()
+    if not self:popChar("#") then return end
+    
+    local base = self:expr() or self:report("expr expected")
+    
+    --// Node
+    local node = self:node("len_op", start, base and true)
+    node.base = base
+    
+    return node
+end
+function Parser:not_op()
+    
+    local start = self:pos()
+    if not self:popWord("not") then return end
+    
+    local base = self:expr() or self:report("expr expected")
+    
+    --// Node
+    local node = self:node("not_op", start, base and true)
+    node.base = base
+    
+    return node
+end
+function Parser:unm_op()
+    
+    local start = self:pos()
+    if not self:popOperator("-") then return end
+    
+    local base = self:expr() or self:report("expr expected")
+    
+    --// Node
+    local node = self:node("unm_op", start, base and true)
+    node.base = base
+    
+    return node
 end
 
 function Parser:mid(base, maxLevel: number)
