@@ -27,7 +27,7 @@ function Lexer:tokenize()
     local Diagnostic = {}
     Diagnostic.__index = Diagnostic
     
-    function Diagnostic:printError()
+    function Diagnostic:printError(showTraceback: boolean?)
         
         local fullLine = lexer:sub(self.begin.absolute - self.begin.column + 1, self.final.absolute)
         print(
@@ -36,6 +36,7 @@ function Lexer:tokenize()
             ..string.rep("^", self.final.absolute - self.begin.absolute + 1)
             .." "..self.message
         )
+        if showTraceback then print(self.traceback) end
     end
     
     --// Methods
@@ -54,7 +55,7 @@ function Lexer:tokenize()
     function self:report(message: string)
         
         local badTok = self:peek() or tokens[#tokens]
-        local diagnostic = setmetatable({ message = `{message}, got {badTok}`, begin = badTok.start, final = badTok.final }, Diagnostic)
+        local diagnostic = setmetatable({ traceback = debug.traceback("", 2):sub(2), message = `{message}, got {badTok}`, begin = badTok.start, final = badTok.final }, Diagnostic)
         table.insert(diagnostics, diagnostic)
     end
     function self:pos(offset: number?)
