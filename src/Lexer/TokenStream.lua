@@ -32,7 +32,7 @@ function Lexer:tokenize()
         local fullLine = lexer:sub(self.begin.absolute - self.begin.column + 1, self.final.absolute)
         print(
             fullLine..'\n'
-            ..string.rep(" ", self.begin.column - 2)
+            ..string.rep(" ", self.begin.column - 1)
             ..string.rep("^", self.final.absolute - self.begin.absolute + 1)
             .." "..self.message
         )
@@ -75,6 +75,14 @@ function Lexer:tokenize()
         
         local backIndex = index
         return function()
+            
+            while true do
+                
+                local diagnostic = diagnostics[#diagnostics]
+                if not diagnostic or diagnostic.begin.absolute < backIndex then break end
+                
+                diagnostics[#diagnostics] = nil
+            end
             
             index = backIndex
             return self
