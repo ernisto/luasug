@@ -238,10 +238,12 @@ end
 function Parser:arrow_func()
     
     local start = self:pos()
+    local rollback = self:backpoint()
+    
     local params = self:expr_tuple_def()
     if not params then return end
     
-    if not self:popOperator("=>") then return end
+    if not self:popOperator("=>") then rollback() return end
     local result = self:expr()
     
     --// Node
